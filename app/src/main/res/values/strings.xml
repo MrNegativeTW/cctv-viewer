@@ -1,0 +1,8 @@
+<resources xmlns:tools="http://schemas.android.com/tools" tools:locale="zh-TW">
+    <string name="app_name">監視器</string>
+    <string name="camera_number">攝影機 %1$d</string>
+    <string name="retry">重試</string>
+    <string name="camera_not_configured">尚未設定此攝影機的有效網址。</string>
+    <string name="camera_load_failed">無法開啟此攝影機。請確認攝影機已連線，且電視已連接至正確的網路。</string>
+    <string name="camera_certificate_error">無法驗證此攝影機的安全性憑證。</string>
+</resources>

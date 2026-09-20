@@ -1,0 +1,11 @@
+<resources>
+    <!-- 此主題僅設定視窗；介面色彩、字型及元件由 Compose for TV 的 MaterialTheme 管理。 -->
+    <style name="Theme.CCTVViewer" parent="">
+        <item name="android:windowNoTitle">true</item>
+        <item name="android:windowActionBar">false</item>
+        <item name="android:windowFullscreen">true</item>
+        <item name="android:windowActionModeOverlay">true</item>
+        <item name="android:windowBackground">@color/background</item>
+        <item name="android:windowLightStatusBar">false</item>
+    </style>
+</resources>
