@@ -11,6 +11,7 @@ import androidx.compose.animation.shrinkVertically
 import androidx.compose.animation.slideInVertically
 import androidx.compose.animation.slideOutVertically
 import androidx.compose.foundation.horizontalScroll
+import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -32,11 +33,14 @@ import androidx.compose.ui.focus.focusRequester
 import androidx.compose.ui.focus.onFocusChanged
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextOverflow
+import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.tv.material3.MaterialTheme
 import androidx.tv.material3.Text
 import com.txwstudio.app.cctvviewer.R
 import com.txwstudio.app.cctvviewer.data.Camera
+import com.txwstudio.app.cctvviewer.ui.preview.CameraPreviewData
+import com.txwstudio.app.cctvviewer.ui.theme.CCTVViewerTheme
 
 @Composable
 fun CameraSelectionBar(
@@ -113,3 +117,20 @@ fun CameraSelectionBar(
 }
 
 private const val ANIMATION_MS = 260
+
+@Preview(name = "電視・攝影機選單", widthDp = 960, heightDp = 116, locale = "zh-rTW")
+@Composable
+private fun CameraSelectionBarPreview() {
+    CCTVViewerTheme {
+        Column(Modifier.background(MaterialTheme.colorScheme.background)) {
+            CameraSelectionBar(
+                cameras = CameraPreviewData.cameras,
+                activeIndex = 0,
+                focusedIndex = 1,
+                transition = remember { MutableTransitionState(true) },
+                onCameraFocused = {},
+                onCameraConfirmed = {},
+            )
+        }
+    }
+}

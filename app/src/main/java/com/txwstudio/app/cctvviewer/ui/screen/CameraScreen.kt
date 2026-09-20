@@ -22,9 +22,12 @@ import androidx.compose.ui.input.key.KeyEventType
 import androidx.compose.ui.input.key.key
 import androidx.compose.ui.input.key.onPreviewKeyEvent
 import androidx.compose.ui.input.key.type
+import androidx.compose.ui.tooling.preview.Preview
 import androidx.tv.material3.MaterialTheme
 import com.txwstudio.app.cctvviewer.ui.component.CameraSelectionBar
 import com.txwstudio.app.cctvviewer.ui.component.CameraWebView
+import com.txwstudio.app.cctvviewer.ui.preview.CameraPreviewData
+import com.txwstudio.app.cctvviewer.ui.theme.CCTVViewerTheme
 import com.txwstudio.app.cctvviewer.ui.viewmodel.CameraAction
 import com.txwstudio.app.cctvviewer.ui.viewmodel.CameraUiState
 
@@ -94,5 +97,24 @@ fun CameraScreen(state: CameraUiState, onAction: (CameraAction) -> Unit) {
         if (!barReady) {
             if (hasLoadError) retryFocus.requestFocus() else viewerFocus.requestFocus()
         }
+    }
+}
+
+@Preview(name = "電視・攝影機清單", widthDp = 960, heightDp = 540, locale = "zh-rTW")
+@Composable
+private fun CameraScreenPreview() {
+    CCTVViewerTheme {
+        CameraScreen(state = CameraUiState(cameras = CameraPreviewData.cameras), onAction = {})
+    }
+}
+
+@Preview(name = "電視・全畫面", widthDp = 960, heightDp = 540, locale = "zh-rTW")
+@Composable
+private fun CameraFullscreenPreview() {
+    CCTVViewerTheme {
+        CameraScreen(
+            state = CameraUiState(cameras = CameraPreviewData.cameras, cameraBarVisible = false),
+            onAction = {},
+        )
     }
 }
