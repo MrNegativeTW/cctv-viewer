@@ -9,4 +9,6 @@ sealed interface CameraAction {
     data class CameraFocused(val index: Int) : CameraAction
     data class ConfirmCamera(val index: Int) : CameraAction
     data object ReloadCamera : CameraAction
+    data object OpenSettings : CameraAction
+    data object CloseSettings : CameraAction
 }

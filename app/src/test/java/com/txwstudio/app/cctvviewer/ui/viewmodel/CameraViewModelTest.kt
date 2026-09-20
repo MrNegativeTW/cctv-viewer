@@ -2,7 +2,11 @@ package com.txwstudio.app.cctvviewer.ui.viewmodel
 
 import androidx.lifecycle.SavedStateHandle
 import com.txwstudio.app.cctvviewer.data.Camera
-import com.txwstudio.app.cctvviewer.data.CameraRepository
+import com.txwstudio.app.cctvviewer.data.FakeCameraRepository
+import androidx.lifecycle.ViewModelStore
+import androidx.lifecycle.ViewModelProvider
+import androidx.lifecycle.viewmodel.initializer
+import androidx.lifecycle.viewmodel.viewModelFactory
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.test.StandardTestDispatcher
@@ -22,8 +26,8 @@ import org.junit.Test
 class CameraViewModelTest {
     private val dispatcher = StandardTestDispatcher()
     private val cameras = List(8) { Camera("Camera ${it + 1}", "https://example.invalid/${it + 1}") }
-    private val repository = CameraRepository { cameras }
-    private val models = mutableListOf<CameraViewModel>()
+    private val repository = FakeCameraRepository(cameras)
+    private val stores = mutableListOf<ViewModelStore>()
 
     @Before
     fun setUp() {
@@ -32,12 +36,17 @@ class CameraViewModelTest {
 
     @After
     fun tearDown() {
-        models.forEach { it.onForegroundChanged(false) }
+        stores.forEach { it.clear() }
         Dispatchers.resetMain()
     }
 
-    private fun model(handle: SavedStateHandle = SavedStateHandle()) =
-        CameraViewModel(repository, handle).also { models += it }
+    private fun model(handle: SavedStateHandle = SavedStateHandle()): CameraViewModel {
+        val store = ViewModelStore().also { stores += it }
+        val factory = viewModelFactory { initializer { CameraViewModel(repository, handle) } }
+        return ViewModelProvider(store, factory)[CameraViewModel::class.java].also {
+            dispatcher.scheduler.runCurrent()
+        }
+    }
 
     @Test
     fun startsWithFirstCameraAndVisibleMenu() {
@@ -66,7 +75,7 @@ class CameraViewModelTest {
         vm.onAction(CameraAction.FocusPreviousCamera)
         assertEquals(0, vm.uiState.value.focusedIndex)
         repeat(12) { vm.onAction(CameraAction.FocusNextCamera) }
-        assertEquals(7, vm.uiState.value.focusedIndex)
+        assertEquals(8, vm.uiState.value.focusedIndex)
     }
 
     @Test
@@ -132,7 +141,7 @@ class CameraViewModelTest {
             "focused_camera_index" to 99,
         ))).uiState.value
         assertEquals(0, state.activeIndex)
-        assertEquals(7, state.focusedIndex)
+        assertEquals(8, state.focusedIndex)
     }
 
     @Test
@@ -244,4 +253,51 @@ class CameraViewModelTest {
         runCurrent()
         assertTrue(vm.uiState.value.cameraBarVisible)
     }
+    @Test
+    fun remoteNameChangeUpdatesWithoutReload() = runTest {
+        val vm = model()
+        repository.saveCameras(cameras.mapIndexed { index, camera ->
+            if (index == 0) camera.copy(name = "新名稱") else camera
+        })
+        runCurrent()
+        assertEquals("新名稱", vm.uiState.value.activeCamera?.name)
+        assertEquals(0, vm.uiState.value.reloadVersion)
+    }
+
+    @Test
+    fun remoteActiveUrlChangeReloadsOnlyCurrentCamera() = runTest {
+        val vm = model()
+        repository.saveCameras(cameras.mapIndexed { index, camera ->
+            if (index == 1) camera.copy(url = "https://example.invalid/other") else camera
+        })
+        runCurrent()
+        assertEquals(0, vm.uiState.value.reloadVersion)
+        repository.saveCameras(repository.cameras.value.mapIndexed { index, camera ->
+            if (index == 0) camera.copy(url = "https://example.invalid/current") else camera
+        })
+        runCurrent()
+        assertEquals("https://example.invalid/current", vm.uiState.value.activeCamera?.url)
+        assertEquals(1, vm.uiState.value.reloadVersion)
+    }
+
+    @Test
+    fun settingsPauseAutoHideAndClosingRestartsTimer() = runTest {
+        val vm = model()
+        vm.onForegroundChanged(true)
+        vm.onAction(CameraAction.OpenSettings)
+        runCurrent()
+        advanceTimeBy(30_000)
+        runCurrent()
+        assertTrue(vm.uiState.value.settingsVisible)
+        assertTrue(vm.uiState.value.cameraBarVisible)
+        vm.onAction(CameraAction.CloseSettings)
+        runCurrent()
+        advanceTimeBy(9_999)
+        runCurrent()
+        assertTrue(vm.uiState.value.cameraBarVisible)
+        advanceTimeBy(1)
+        runCurrent()
+        assertFalse(vm.uiState.value.cameraBarVisible)
+    }
+
 }

@@ -35,6 +35,19 @@
 
 ## 攝影機設定
 
+### 使用手機設定
+
+1. 手機與電視連上可互通的區域網路，電視可使用 Wi-Fi 或有線連線。
+2. 在攝影機清單最右側選擇「手機設定」，或按遙控器的選單鍵。
+3. 手機掃描電視上的 QR Code，在瀏覽器修改八組名稱與網址後按「儲存設定」。
+4. 完成後關閉電視上的設定視窗。關閉視窗或離開應用程式後，臨時連結即失效。
+
+設定會保存在電視的 DataStore，重開應用程式後仍會保留，不需要重新建置。修改名稱不會中斷畫面；修改目前觀看的網址時才會重新載入。設定視窗開啟期間暫停清單的自動隱藏。
+
+設定服務使用 IPv4 與 HTTP，僅供可信任的區域網路使用；臨時連結限制存取，但不加密傳輸。
+
+### 建置時的初始設定（選用）
+
 首次設定時，在專案根目錄複製 [cameras.example.properties](cameras.example.properties)：
 
 ```sh
@@ -50,9 +63,11 @@ camera.1.url=http://192.0.2.10/view?channel=1&mode=live
 
 `cameras.local.properties` 已加入 `.gitignore`，只供本機使用。`local.properties` 則保留給 Android Studio 管理 SDK 路徑。
 
-Android Studio 與命令列建置都會透過 Gradle 讀取本機設定，產生 `BuildConfig`，由 `BuildConfigCameraRepository` 提供給應用程式。修改後重新同步或建置並安裝即可，不需編輯 XML 或 Kotlin 原始碼。
+Android Studio 與命令列建置都會透過 Gradle 讀取本機設定並產生 `BuildConfig`，由 `BuildConfigCameraDefaults` 提供初始值。手機儲存過設定後，電視會優先使用 DataStore 的內容，更新安裝檔不會覆蓋已儲存的設定。
 
-第一組設定就是啟動時載入的攝影機。沒有本機設定檔時仍可建置，預設顯示八個通用名稱及空白網址；缺少名稱也會使用通用名稱，網址留空則顯示尚未設定的訊息。
+若要分享不含私人初始值的安裝檔，可使用 `./gradlew :app:assembleDebug -PincludeLocalCameras=false`。若要重新採用建置初始值，需在電視的系統設定中清除本應用程式資料。
+
+第一組設定就是啟動時載入的攝影機。沒有本機設定檔時仍可建置，初始顯示八個通用名稱及空白網址，再透過手機完成設定；網址留空則顯示尚未設定的訊息。
 
 - 網址須使用 `http://` 或 `https://`。應用程式未內建 RTSP 播放器。
 - 設定檔使用 UTF-8，可直接填入中文；值不需要加引號。

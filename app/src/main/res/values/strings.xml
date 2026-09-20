@@ -5,4 +5,13 @@
     <string name="camera_not_configured">尚未設定此攝影機的有效網址。</string>
     <string name="camera_load_failed">無法開啟此攝影機。請確認攝影機已連線，且電視已連接至正確的網路。</string>
     <string name="camera_certificate_error">無法驗證此攝影機的安全性憑證。</string>
+    <string name="phone_settings">手機設定</string>
+    <string name="close_settings">關閉</string>
+    <string name="settings_qr_description">掃描以設定攝影機</string>
+    <string name="settings_instructions">手機與電視連上同一區域網路後，掃描 QR Code 或開啟下方網址。</string>
+    <string name="settings_session_hint">儲存後電視會立即更新。關閉此視窗或離開應用程式，設定連結即失效。</string>
+    <string name="settings_starting">正在啟動設定服務…</string>
+    <string name="settings_server_failed">無法啟動設定服務。請確認電視已連上 Wi-Fi 或有線區域網路，再重新開啟此視窗。</string>
+    <string name="configuration_loading">正在讀取攝影機設定…</string>
+    <string name="configuration_failed">無法讀取攝影機設定，請重新開啟應用程式。</string>
 </resources>

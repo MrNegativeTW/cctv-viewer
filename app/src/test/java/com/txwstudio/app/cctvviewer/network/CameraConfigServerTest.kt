@@ -1,0 +1,123 @@
+package com.txwstudio.app.cctvviewer.network
+
+import com.txwstudio.app.cctvviewer.data.Camera
+import java.net.Socket
+import java.net.InetSocketAddress
+import java.net.URI
+import java.net.URLEncoder
+import org.junit.After
+import org.junit.Assert.assertEquals
+import org.junit.Assert.assertFalse
+import org.junit.Assert.assertTrue
+import org.junit.Before
+import org.junit.Test
+
+class CameraConfigServerTest {
+    private var cameras = List(8) { Camera("攝影機 ${it + 1}", "https://example.invalid/${it + 1}") }
+    private lateinit var server: CameraConfigServer
+    private var saves = 0
+
+    @Before
+    fun start() {
+        server = CameraConfigServer("127.0.0.1", { cameras }, { cameras = it; saves++ })
+        server.start(2000, true)
+    }
+
+    @After
+    fun stop() { server.stop() }
+
+    private data class Result(val status: Int, val body: String, val location: String?, val cache: String?)
+
+    private fun request(url: String = server.url, body: String? = null, origin: String? = null): Result {
+        val uri = URI(url)
+        val bytes = body?.toByteArray(Charsets.UTF_8)
+        val target = uri.rawPath + (uri.rawQuery?.let { "?$it" } ?: "")
+        val headers = buildString {
+            append("${if (body == null) "GET" else "POST"} $target HTTP/1.1\r\n")
+            append("Host: ${uri.authority}\r\nConnection: close\r\n")
+            if (bytes != null) {
+                append("Content-Type: application/x-www-form-urlencoded; charset=utf-8\r\n")
+                append("Content-Length: ${bytes.size}\r\n")
+            }
+            if (origin != null) append("Origin: $origin\r\n")
+            append("\r\n")
+        }
+        return Socket().use { socket ->
+            socket.connect(InetSocketAddress(uri.host, uri.port), 2000)
+            socket.soTimeout = 2000
+            socket.getOutputStream().apply {
+                write(headers.toByteArray(Charsets.UTF_8))
+                // 超出限制時只送標頭，驗證服務在讀取內容之前就拒絕。
+                if (bytes != null && bytes.size <= 256 * 1024) write(bytes)
+                flush()
+            }
+            val response = socket.getInputStream().readBytes().toString(Charsets.UTF_8)
+            val sections = response.split("\r\n\r\n", limit = 2)
+            val lines = sections[0].split("\r\n")
+            val fields = lines.drop(1).associate {
+                val pair = it.split(':', limit = 2)
+                pair[0].lowercase() to pair[1].trim()
+            }
+            Result(lines[0].split(' ')[1].toInt(), sections.getOrElse(1) { "" }, fields["location"], fields["cache-control"])
+        }
+    }
+
+    private fun form(values: List<Camera> = cameras) = values.flatMapIndexed { index, camera ->
+        listOf("camera.${index + 1}.name" to camera.name, "camera.${index + 1}.url" to camera.url)
+    }.joinToString("&") { (key, value) ->
+        "${URLEncoder.encode(key, "UTF-8")}=${URLEncoder.encode(value, "UTF-8")}"
+    }
+
+    @Test
+    fun servesEightEscapedFieldsOnlyWithSessionLink() {
+        cameras = cameras.map { it.copy(name = "\"><script>alert(1)</script>&中文") }
+        val page = request()
+        assertEquals(200, page.status)
+        assertEquals(8, Regex("<fieldset>").findAll(page.body).count())
+        assertTrue(page.body.contains("&lt;script&gt;"))
+        assertFalse(page.body.contains("<script>"))
+        assertEquals("no-store", page.cache)
+        assertEquals(404, request("http://127.0.0.1:${server.listeningPort}/").status)
+        assertEquals(404, request("http://127.0.0.1:${server.listeningPort}/wrong-token").status)
+    }
+
+    @Test
+    fun savesUtf8AndQueryParametersAndRedirectsToConfirmation() {
+        val edited = cameras.mapIndexed { index, camera ->
+            if (index == 0) Camera("新名稱 & \"測試\"", "http://192.0.2.1/view?x=a+b&token=abc%2Fdef") else camera
+        }
+        val origin = URI(server.url).let { "${it.scheme}://${it.authority}" }
+        val result = request(body = form(edited), origin = origin)
+        assertEquals(303, result.status)
+        assertEquals(edited, cameras)
+        assertEquals(1, saves)
+        assertTrue(request("$origin${result.location}").body.contains("已儲存"))
+    }
+
+    @Test
+    fun invalidOrPartialInputDoesNotSaveAnything() {
+        val original = cameras
+        assertEquals(400, request(body = form(cameras.map { it.copy(url = "file:///etc/passwd") })).status)
+        assertEquals(400, request(body = "camera.1.name=test").status)
+        assertEquals(400, request(body = form() + "&camera.1.name=duplicate").status)
+        assertEquals(original, cameras)
+        assertEquals(0, saves)
+    }
+
+    @Test
+    fun rejectsCrossOriginAndOversizedRequests() {
+        assertEquals(403, request(body = form(), origin = "https://example.invalid").status)
+        assertEquals(400, request(body = "x=" + "a".repeat(300_000)).status)
+        assertEquals(0, saves)
+    }
+
+    @Test
+    fun closingAndReopeningInvalidatesPreviousLink() {
+        val oldPath = URI(server.url).path
+        server.stop()
+        server = CameraConfigServer("127.0.0.1", { cameras }, { cameras = it })
+        server.start(2000, true)
+        assertEquals(404, request("http://127.0.0.1:${server.listeningPort}$oldPath").status)
+        assertEquals(200, request().status)
+    }
+}

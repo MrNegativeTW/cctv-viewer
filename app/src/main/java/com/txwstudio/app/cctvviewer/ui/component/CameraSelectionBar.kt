@@ -50,9 +50,10 @@ fun CameraSelectionBar(
     transition: MutableTransitionState<Boolean>,
     onCameraFocused: (Int) -> Unit,
     onCameraConfirmed: (Int) -> Unit,
+    onOpenSettings: () -> Unit,
 ) {
-    val focusRequesters = remember(cameras.size) { List(cameras.size) { FocusRequester() } }
-    val scrollRequesters = remember(cameras.size) { List(cameras.size) { BringIntoViewRequester() } }
+    val focusRequesters = remember(cameras.size) { List(cameras.size + 1) { FocusRequester() } }
+    val scrollRequesters = remember(cameras.size) { List(cameras.size + 1) { BringIntoViewRequester() } }
     val scrollState = rememberScrollState()
     val ready = transition.isIdle && transition.currentState
 
@@ -104,6 +105,16 @@ fun CameraSelectionBar(
                         }
                     }
                 }
+                CameraButton(
+                    onClick = { if (ready) onOpenSettings() },
+                    modifier = Modifier.width(128.dp).height(64.dp)
+                        .bringIntoViewRequester(scrollRequesters[cameras.size])
+                        .focusRequester(focusRequesters[cameras.size])
+                        .focusProperties { canFocus = ready }
+                        .onFocusChanged { if (it.isFocused) onCameraFocused(cameras.size) },
+                ) {
+                    Text(stringResource(R.string.phone_settings), style = MaterialTheme.typography.titleMedium)
+                }
             }
         }
         // 只在清單已展開且節點存在時還原焦點，避免動畫與捲動互相干擾。
@@ -130,6 +141,7 @@ private fun CameraSelectionBarPreview() {
                 transition = remember { MutableTransitionState(true) },
                 onCameraFocused = {},
                 onCameraConfirmed = {},
+                onOpenSettings = {},
             )
         }
     }

@@ -15,6 +15,8 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.Alignment
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.focus.FocusRequester
 import androidx.compose.ui.focus.focusRequester
 import androidx.compose.ui.input.key.Key
@@ -24,6 +26,8 @@ import androidx.compose.ui.input.key.onPreviewKeyEvent
 import androidx.compose.ui.input.key.type
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.tv.material3.MaterialTheme
+import androidx.tv.material3.Text
+import com.txwstudio.app.cctvviewer.R
 import com.txwstudio.app.cctvviewer.ui.component.CameraSelectionBar
 import com.txwstudio.app.cctvviewer.ui.component.CameraWebView
 import com.txwstudio.app.cctvviewer.ui.preview.CameraPreviewData
@@ -33,6 +37,14 @@ import com.txwstudio.app.cctvviewer.ui.viewmodel.CameraUiState
 
 @Composable
 fun CameraScreen(state: CameraUiState, onAction: (CameraAction) -> Unit) {
+    val activeCamera = state.activeCamera
+    if (activeCamera == null) {
+        Box(Modifier.fillMaxSize().background(MaterialTheme.colorScheme.background), contentAlignment = Alignment.Center) {
+            Text(stringResource(if (state.configurationError) R.string.configuration_failed else R.string.configuration_loading),
+                color = MaterialTheme.colorScheme.onBackground)
+        }
+        return
+    }
     val viewerFocus = remember { FocusRequester() }
     val retryFocus = remember { FocusRequester() }
     val barTransition = remember { MutableTransitionState(state.cameraBarVisible) }
@@ -49,6 +61,10 @@ fun CameraScreen(state: CameraUiState, onAction: (CameraAction) -> Unit) {
                     onAction(CameraAction.UserInteraction)
                 }
                 when (event.key) {
+                    Key.Menu -> {
+                        if (event.type == KeyEventType.KeyDown) onAction(CameraAction.OpenSettings)
+                        true
+                    }
                     Key.DirectionUp, Key.DirectionDown -> {
                         if (event.type == KeyEventType.KeyDown) {
                             onAction(
@@ -75,7 +91,7 @@ fun CameraScreen(state: CameraUiState, onAction: (CameraAction) -> Unit) {
         Box(Modifier.fillMaxWidth().weight(1f)) {
             key(state.activeIndex, state.reloadVersion) {
                 CameraWebView(
-                    camera = state.activeCamera,
+                    camera = activeCamera,
                     onReload = { onAction(CameraAction.ReloadCamera) },
                     onLoadErrorChanged = { hasLoadError = it },
                     retryFocusRequester = retryFocus,
@@ -90,6 +106,7 @@ fun CameraScreen(state: CameraUiState, onAction: (CameraAction) -> Unit) {
             transition = barTransition,
             onCameraFocused = { onAction(CameraAction.CameraFocused(it)) },
             onCameraConfirmed = { onAction(CameraAction.ConfirmCamera(it)) },
+            onOpenSettings = { onAction(CameraAction.OpenSettings) },
         )
     }
 

@@ -5,6 +5,8 @@ import androidx.compose.runtime.getValue
 import androidx.lifecycle.compose.LifecycleResumeEffect
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.txwstudio.app.cctvviewer.ui.viewmodel.CameraViewModel
+import com.txwstudio.app.cctvviewer.ui.viewmodel.CameraAction
+import com.txwstudio.app.cctvviewer.ui.component.CameraSettingsDialog
 
 @Composable
 fun CameraRoute(viewModel: CameraViewModel) {
@@ -16,4 +18,11 @@ fun CameraRoute(viewModel: CameraViewModel) {
     }
 
     CameraScreen(state = state, onAction = viewModel::onAction)
+    if (state.settingsVisible) {
+        CameraSettingsDialog(
+            readCameras = viewModel::readCameraSettings,
+            saveCameras = viewModel::saveCameraSettings,
+            onDismiss = { viewModel.onAction(CameraAction.CloseSettings) },
+        )
+    }
 }
