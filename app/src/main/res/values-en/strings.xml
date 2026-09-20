@@ -1,0 +1,41 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="app_name">CCTV Viewer</string>
+    <string name="camera_number">Camera %1$d</string>
+    <string name="retry">Retry</string>
+    <string name="camera_not_configured">This camera does not have a valid URL configured yet.</string>
+    <string name="camera_load_failed">Unable to open this camera. Check that it is online and your TV is connected to the correct network.</string>
+    <string name="camera_certificate_error">Unable to verify this camera’s security certificate.</string>
+    <string name="phone_settings">Phone settings</string>
+    <string name="close_settings">Close</string>
+    <string name="settings_qr_description">Scan to configure cameras</string>
+    <string name="settings_instructions">Connect your phone and TV to the same local network, then scan the QR code or open the address below.</string>
+    <string name="settings_session_hint">Changes appear on the TV immediately. Closing this window or leaving the app invalidates this link.</string>
+    <string name="settings_starting">Starting the settings service…</string>
+    <string name="settings_server_failed">Unable to start the settings service. Connect the TV to Wi-Fi or a wired local network, then reopen this window.</string>
+    <string name="configuration_loading">Loading camera settings…</string>
+    <string name="configuration_failed">Unable to read camera settings. Please reopen the app.</string>
+    <string name="webview_preview_caption">Web page preview</string>
+    <string name="web_title">Camera settings</string>
+    <string name="web_intro">Edit the names and URLs, then select “Save settings” to update the TV. URLs can be left blank.</string>
+    <string name="web_name">Name</string>
+    <string name="web_url">URL</string>
+    <string name="web_url_placeholder">http:// or https://</string>
+    <string name="web_save">Save settings</string>
+    <string name="web_session_hint">When finished, close the settings window on the TV. This link only works while that window is open.</string>
+    <string name="web_saved">Saved. The TV settings have been updated.</string>
+    <string name="web_invalid_link">This link is invalid. Please scan the QR code on the TV again.</string>
+    <string name="web_method_not_allowed">This operation is not supported.</string>
+    <string name="web_invalid_config">The settings are invalid.</string>
+    <string name="web_storage_failed">Unable to save or read settings. Please try again later.</string>
+    <string name="web_wrong_origin">Please use the settings link displayed on the TV.</string>
+    <string name="web_unsupported_format">This settings format is not supported.</string>
+    <string name="web_body_invalid">The settings are too large or incorrectly formatted.</string>
+    <string name="web_duplicate_field">The settings contain duplicate fields.</string>
+    <string name="web_missing_name">A camera name field is missing.</string>
+    <string name="web_missing_url">A camera URL field is missing.</string>
+    <string name="validation_count">Please provide settings for all eight cameras.</string>
+    <string name="validation_name">The name for camera %1$d is too long or contains invalid characters.</string>
+    <string name="validation_url_length">The URL for camera %1$d is too long.</string>
+    <string name="validation_url">Enter a valid HTTP or HTTPS URL for camera %1$d.</string>
+</resources>

@@ -12,6 +12,7 @@ import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.semantics.selected
 import androidx.compose.ui.tooling.preview.Preview
@@ -22,6 +23,7 @@ import androidx.tv.material3.ButtonDefaults
 import androidx.tv.material3.MaterialTheme
 import androidx.tv.material3.Text
 import com.txwstudio.app.cctvviewer.ui.theme.CCTVViewerTheme
+import com.txwstudio.app.cctvviewer.R
 
 @Composable
 fun CameraButton(
@@ -61,10 +63,10 @@ private fun CameraButtonPreview() {
             horizontalArrangement = Arrangement.spacedBy(16.dp),
         ) {
             CameraButton(onClick = {}, modifier = Modifier.width(128.dp).height(64.dp)) {
-                Text("攝影機 1")
+                Text(stringResource(R.string.camera_number, 1))
             }
             CameraButton(onClick = {}, selected = true, modifier = Modifier.width(128.dp).height(64.dp)) {
-                Text("攝影機 2")
+                Text(stringResource(R.string.camera_number, 2))
             }
         }
     }

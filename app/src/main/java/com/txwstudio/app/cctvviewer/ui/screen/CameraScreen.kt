@@ -31,6 +31,7 @@ import com.txwstudio.app.cctvviewer.R
 import com.txwstudio.app.cctvviewer.ui.component.CameraSelectionBar
 import com.txwstudio.app.cctvviewer.ui.component.CameraWebView
 import com.txwstudio.app.cctvviewer.ui.preview.CameraPreviewData
+import com.txwstudio.app.cctvviewer.ui.preview.CameraLocalesPreview
 import com.txwstudio.app.cctvviewer.ui.theme.CCTVViewerTheme
 import com.txwstudio.app.cctvviewer.ui.viewmodel.CameraAction
 import com.txwstudio.app.cctvviewer.ui.viewmodel.CameraUiState
@@ -117,11 +118,11 @@ fun CameraScreen(state: CameraUiState, onAction: (CameraAction) -> Unit) {
     }
 }
 
-@Preview(name = "電視・攝影機清單", widthDp = 960, heightDp = 540, locale = "zh-rTW")
+@CameraLocalesPreview
 @Composable
 private fun CameraScreenPreview() {
     CCTVViewerTheme {
-        CameraScreen(state = CameraUiState(cameras = CameraPreviewData.cameras), onAction = {})
+        CameraScreen(state = CameraUiState(cameras = CameraPreviewData.cameras()), onAction = {})
     }
 }
 
@@ -130,7 +131,7 @@ private fun CameraScreenPreview() {
 private fun CameraFullscreenPreview() {
     CCTVViewerTheme {
         CameraScreen(
-            state = CameraUiState(cameras = CameraPreviewData.cameras, cameraBarVisible = false),
+            state = CameraUiState(cameras = CameraPreviewData.cameras(), cameraBarVisible = false),
             onAction = {},
         )
     }

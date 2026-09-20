@@ -2,29 +2,32 @@ package com.txwstudio.app.cctvviewer.network
 
 import com.txwstudio.app.cctvviewer.data.Camera
 import com.txwstudio.app.cctvviewer.data.CameraSettings
+import com.txwstudio.app.cctvviewer.i18n.WebMessage
+import com.txwstudio.app.cctvviewer.i18n.WebStrings
 
 internal object CameraSettingsPage {
-    fun render(cameras: List<Camera>, action: String, message: String = ""): String {
+    fun render(cameras: List<Camera>, action: String, strings: WebStrings, message: String = ""): String {
+        fun text(key: WebMessage) = escape(strings.text(key))
         val fields = cameras.mapIndexed { index, camera ->
             val number = index + 1
             """
             <fieldset>
-              <legend>攝影機 $number</legend>
-              <label for="name-$number">名稱</label>
-              <input id="name-$number" name="camera.$number.name" value="${escape(camera.name)}" maxlength="${CameraSettings.MAX_NAME_LENGTH}" autocomplete="off">
-              <label for="url-$number">網址</label>
-              <input id="url-$number" name="camera.$number.url" type="url" value="${escape(camera.url)}" maxlength="${CameraSettings.MAX_URL_LENGTH}" placeholder="http:// 或 https://" autocapitalize="none" spellcheck="false" autocomplete="off">
+              <legend>${escape(strings.text(WebMessage.CAMERA_NUMBER, number))}</legend>
+              <label for="name-$number">${text(WebMessage.WEB_NAME)}</label>
+              <input id="name-$number" name="camera.$number.name" value="${escape(camera.name)}" placeholder="${escape(strings.text(WebMessage.CAMERA_NUMBER, number))}" maxlength="${CameraSettings.MAX_NAME_LENGTH}" autocomplete="off">
+              <label for="url-$number">${text(WebMessage.WEB_URL)}</label>
+              <input id="url-$number" name="camera.$number.url" type="url" value="${escape(camera.url)}" maxlength="${CameraSettings.MAX_URL_LENGTH}" placeholder="${text(WebMessage.WEB_URL_PLACEHOLDER)}" autocapitalize="none" spellcheck="false" autocomplete="off">
             </fieldset>
             """.trimIndent()
         }.joinToString("\n")
         return """
             <!doctype html>
-            <html lang="zh-Hant-TW">
+            <html lang="${strings.language.htmlTag}">
             <head>
               <meta charset="utf-8">
               <meta name="viewport" content="width=device-width, initial-scale=1">
               <meta name="referrer" content="no-referrer">
-              <title>監視器設定</title>
+              <title>${text(WebMessage.WEB_TITLE)}</title>
               <style>
                 * { box-sizing: border-box; }
                 body { margin: 0; padding: 24px 16px; background: #101815; color: #e0e4df; font-family: system-ui, sans-serif; }
@@ -41,14 +44,14 @@ internal object CameraSettingsPage {
               </style>
             </head>
             <body><main>
-              <h1>監視器設定</h1>
-              <p>修改名稱與網址後按「儲存設定」，電視會直接更新。網址可留空。</p>
+              <h1>${text(WebMessage.WEB_TITLE)}</h1>
+              <p>${text(WebMessage.WEB_INTRO)}</p>
               ${if (message.isEmpty()) "" else "<p class=\"notice\" role=\"status\">${escape(message)}</p>"}
               <form method="post" action="${escape(action)}" accept-charset="UTF-8">
                 $fields
-                <button type="submit">儲存設定</button>
+                <button type="submit">${text(WebMessage.WEB_SAVE)}</button>
               </form>
-              <p>完成後可關閉電視上的設定視窗。此連結僅在該視窗開啟期間有效。</p>
+              <p>${text(WebMessage.WEB_SESSION_HINT)}</p>
             </main></body>
             </html>
         """.trimIndent()

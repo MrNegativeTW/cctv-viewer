@@ -1,6 +1,9 @@
 package com.txwstudio.app.cctvviewer.network
 
 import com.txwstudio.app.cctvviewer.data.Camera
+import com.txwstudio.app.cctvviewer.i18n.AppLanguage
+import com.txwstudio.app.cctvviewer.i18n.TestWebStrings
+import com.txwstudio.app.cctvviewer.i18n.WebMessage
 import java.net.Socket
 import java.net.InetSocketAddress
 import java.net.URI
@@ -19,16 +22,16 @@ class CameraConfigServerTest {
 
     @Before
     fun start() {
-        server = CameraConfigServer("127.0.0.1", { cameras }, { cameras = it; saves++ })
+        server = CameraConfigServer("127.0.0.1", { cameras }, { cameras = it; saves++ }, TestWebStrings::forLanguage)
         server.start(2000, true)
     }
 
     @After
     fun stop() { server.stop() }
 
-    private data class Result(val status: Int, val body: String, val location: String?, val cache: String?)
+    private data class Result(val status: Int, val body: String, val location: String?, val cache: String?, val language: String?, val vary: String?)
 
-    private fun request(url: String = server.url, body: String? = null, origin: String? = null): Result {
+    private fun request(url: String = server.url, body: String? = null, origin: String? = null, acceptLanguage: String? = null): Result {
         val uri = URI(url)
         val bytes = body?.toByteArray(Charsets.UTF_8)
         val target = uri.rawPath + (uri.rawQuery?.let { "?$it" } ?: "")
@@ -40,6 +43,7 @@ class CameraConfigServerTest {
                 append("Content-Length: ${bytes.size}\r\n")
             }
             if (origin != null) append("Origin: $origin\r\n")
+            if (acceptLanguage != null) append("Accept-Language: $acceptLanguage\r\n")
             append("\r\n")
         }
         return Socket().use { socket ->
@@ -58,7 +62,7 @@ class CameraConfigServerTest {
                 val pair = it.split(':', limit = 2)
                 pair[0].lowercase() to pair[1].trim()
             }
-            Result(lines[0].split(' ')[1].toInt(), sections.getOrElse(1) { "" }, fields["location"], fields["cache-control"])
+            Result(lines[0].split(' ')[1].toInt(), sections.getOrElse(1) { "" }, fields["location"], fields["cache-control"], fields["content-language"], fields["vary"])
         }
     }
 
@@ -115,9 +119,54 @@ class CameraConfigServerTest {
     fun closingAndReopeningInvalidatesPreviousLink() {
         val oldPath = URI(server.url).path
         server.stop()
-        server = CameraConfigServer("127.0.0.1", { cameras }, { cameras = it })
+        server = CameraConfigServer("127.0.0.1", { cameras }, { cameras = it }, TestWebStrings::forLanguage)
         server.start(2000, true)
         assertEquals(404, request("http://127.0.0.1:${server.listeningPort}$oldPath").status)
         assertEquals(200, request().status)
     }
+    @Test
+    fun rendersFormsAndValidationErrorsInEveryLanguage() {
+        cameras = cameras.map { it.copy(name = "自訂名稱") }
+        AppLanguage.entries.forEach { language ->
+            val strings = TestWebStrings.forLanguage(language)
+            val page = request(acceptLanguage = language.tag)
+            assertEquals(language.tag, page.language)
+            assertEquals("Accept-Language", page.vary)
+            assertTrue(page.body.contains("<html lang=\"${language.htmlTag}\">"))
+            assertTrue(page.body.contains(strings.text(WebMessage.WEB_TITLE)))
+            assertTrue(page.body.contains("value=\"自訂名稱\""))
+            val invalid = cameras.mapIndexed { index, camera ->
+                if (index == 2) camera.copy(url = "javascript:alert(1)") else camera
+            }
+            val error = request(body = form(invalid), acceptLanguage = language.tag)
+            assertEquals(400, error.status)
+            assertEquals(strings.text(WebMessage.VALIDATION_URL, 3), error.body)
+            assertEquals(language.tag, error.language)
+            val unauthorized = request("http://127.0.0.1:${server.listeningPort}/invalid", acceptLanguage = language.tag)
+            assertEquals(strings.text(WebMessage.WEB_INVALID_LINK), unauthorized.body)
+        }
+        assertEquals(0, saves)
+    }
+
+    @Test
+    fun savedMessageAndBlankNamePlaceholderFollowBrowserLanguage() {
+        AppLanguage.entries.forEach { language ->
+            val strings = TestWebStrings.forLanguage(language)
+            val result = request(body = form(List(8) { Camera("", "") }), acceptLanguage = language.tag)
+            assertEquals(303, result.status)
+            assertTrue(cameras.all { it.name.isEmpty() })
+            val page = request("http://127.0.0.1:${server.listeningPort}${result.location}", acceptLanguage = language.tag)
+            assertTrue(page.body.contains(strings.text(WebMessage.WEB_SAVED)))
+            assertTrue(page.body.contains("placeholder=\"${strings.text(WebMessage.CAMERA_NUMBER, 1)}\""))
+        }
+    }
+
+    @Test
+    fun unsupportedBrowserLanguageFallsBackToTraditionalChinese() {
+        val page = request(acceptLanguage = "fr-FR")
+        assertEquals("zh-TW", page.language)
+        assertTrue(page.body.contains("監視器設定"))
+        assertEquals("en-US", request(acceptLanguage = "fr-FR,en-US;q=0.8").language)
+    }
+
 }

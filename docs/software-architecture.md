@@ -22,6 +22,7 @@ flowchart LR
 | --- | --- |
 | `data/` | 攝影機資料模型、設定驗證、BuildConfig 初始值及 DataStore 持久化。 |
 | `network/` | 區網位址選擇、限此次連結存取的 HTTP 服務與手機表單。 |
+| `i18n/` | 手機瀏覽器語言選擇與共用 Android 字串資源的轉接。 |
 | `ui/activity/` | 應用程式入口、視窗設定及相依物件建立。 |
 | `ui/viewmodel/` | 選取狀態、設定資料收集、設定視窗、重新載入指令及 10 秒閒置計時。 |
 | `ui/screen/` | 生命週期感知的狀態收集、遙控器事件轉換與畫面組合。 |
@@ -49,9 +50,29 @@ ViewModel 單元測試位於 `app/src/test/java/com/txwstudio/app/cctvviewer/ui/
 
 DataStore 持久化測試位於 `app/src/test/java/com/txwstudio/app/cctvviewer/data/`；HTTP 測試位於 `app/src/test/java/com/txwstudio/app/cctvviewer/network/`，使用 loopback 連線與示範資料驗證存取限制、字串跳脫、輸入驗證與儲存行為。
 
+## 多語系
+
+電視介面與手機設定頁共用 `res/values*/strings.xml`，包括按鈕、表單、成功提示與驗證錯誤。預設資源為臺灣繁體中文；另外提供明確的 `values-zh-rTW`，避免繁體中文裝置誤用簡體中文資源。
+
+| 語言 | 語系代碼 | 資源目錄 |
+| --- | --- | --- |
+| 繁體中文（臺灣，預設） | `zh-TW` | `values`、`values-zh-rTW` |
+| 簡體中文 | `zh-CN` | `values-zh-rCN` |
+| 英文（美國） | `en-US` | `values-en` |
+| 日文 | `ja-JP` | `values-ja` |
+| 韓文 | `ko-KR` | `values-ko` |
+
+`locales_config.xml` 宣告支援語系，供 Android 13 以上支援應用程式語言設定的裝置使用。較舊版本依系統語言載入資源。
+
+手機請求由 `AppLanguage` 解析 `Accept-Language` 的偏好順序及權重，不支援或格式錯誤時回退繁體中文。`AndroidWebStrings` 以獨立資源設定讀取翻譯，不改變電視的語言。HTTP 回應包含 `Content-Language` 與 `Vary: Accept-Language`；所有翻譯都會一起打包，確保手機可使用與電視不同的語言。
+
+資料層只回傳結構化的 `CameraValidationException`，由網頁呈現層轉成該請求的語言。自訂攝影機名稱與網址維持原值；空白名稱在介面顯示時使用翻譯，不寫入語言相關的預設名稱。
+
+語言選擇、翻譯完整性與格式參數測試位於 `app/src/test/java/com/txwstudio/app/cctvviewer/i18n/`。HTTP 測試涵蓋五種語言的表單、成功訊息、驗證錯誤及預設語言回退。
+
 ## Compose 預覽
 
-在 Android Studio 開啟下列 Kotlin 檔案，切換至設計或分割檢視，即可查看標示 `@Preview` 的元件。完整觀看畫面使用 960 × 540 dp 的橫向尺寸，預覽語系為臺灣繁體中文。
+在 Android Studio 開啟下列 Kotlin 檔案，切換至設計或分割檢視，即可查看預覽。完整觀看畫面使用 960 × 540 dp 的橫向尺寸；觀看畫面與手機設定視窗透過 `@CameraLocalesPreview` 同時提供五種語言，其餘元件維持繁體中文預覽。
 
 | 檔案 | 預覽內容 |
 | --- | --- |

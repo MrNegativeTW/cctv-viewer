@@ -21,6 +21,7 @@ import androidx.compose.ui.draw.clipToBounds
 import androidx.compose.ui.focus.FocusRequester
 import androidx.compose.ui.focus.focusProperties
 import androidx.compose.ui.platform.LocalInspectionMode
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.viewinterop.AndroidView
@@ -30,6 +31,7 @@ import androidx.lifecycle.compose.LocalLifecycleOwner
 import androidx.tv.material3.MaterialTheme
 import androidx.tv.material3.Text
 import com.txwstudio.app.cctvviewer.data.Camera
+import com.txwstudio.app.cctvviewer.R
 import com.txwstudio.app.cctvviewer.ui.preview.CameraPreviewData
 import com.txwstudio.app.cctvviewer.ui.theme.CCTVViewerTheme
 import com.txwstudio.app.cctvviewer.ui.web.CameraPageError
@@ -114,7 +116,7 @@ private fun CameraWebViewPlaceholder(cameraName: String, modifier: Modifier) {
         ) {
             Text(cameraName, style = MaterialTheme.typography.headlineMedium,
                 color = MaterialTheme.colorScheme.onSurface)
-            Text("網頁畫面預覽", style = MaterialTheme.typography.bodyLarge,
+            Text(stringResource(R.string.webview_preview_caption), style = MaterialTheme.typography.bodyLarge,
                 color = MaterialTheme.colorScheme.onSurfaceVariant)
         }
     }
@@ -125,7 +127,7 @@ private fun CameraWebViewPlaceholder(cameraName: String, modifier: Modifier) {
 private fun CameraWebViewPreview() {
     CCTVViewerTheme {
         CameraWebView(
-            camera = CameraPreviewData.cameras.first(),
+            camera = CameraPreviewData.cameras().first(),
             onReload = {},
             onLoadErrorChanged = {},
             retryFocusRequester = remember { FocusRequester() },

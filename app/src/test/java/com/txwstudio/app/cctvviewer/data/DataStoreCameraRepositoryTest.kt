@@ -52,7 +52,7 @@ class DataStoreCameraRepositoryTest {
             assertEquals(edited, repository.cameras.first())
             repository.saveCameras(List(8) { Camera("", "") })
             assertTrue(repository.cameras.first().all { it.url.isEmpty() })
-            assertEquals("攝影機 1", repository.cameras.first().first().name)
+            assertEquals("", repository.cameras.first().first().name)
         } finally {
             secondScope.coroutineContext[Job]!!.cancelAndJoin()
         }

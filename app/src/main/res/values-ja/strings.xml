@@ -1,0 +1,41 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="app_name">監視カメラビューア</string>
+    <string name="camera_number">カメラ %1$d</string>
+    <string name="retry">再試行</string>
+    <string name="camera_not_configured">このカメラには有効なURLが設定されていません。</string>
+    <string name="camera_load_failed">このカメラを開けません。カメラがオンラインで、テレビが正しいネットワークに接続されていることを確認してください。</string>
+    <string name="camera_certificate_error">このカメラのセキュリティ証明書を確認できません。</string>
+    <string name="phone_settings">スマホ設定</string>
+    <string name="close_settings">閉じる</string>
+    <string name="settings_qr_description">読み取ってカメラを設定</string>
+    <string name="settings_instructions">スマートフォンとテレビを同じローカルネットワークに接続し、QRコードを読み取るか、下のURLを開いてください。</string>
+    <string name="settings_session_hint">保存するとテレビにすぐ反映されます。この画面を閉じるか、アプリを離れるとリンクは無効になります。</string>
+    <string name="settings_starting">設定サービスを起動中…</string>
+    <string name="settings_server_failed">設定サービスを起動できません。テレビをWi-Fiまたは有線のローカルネットワークに接続し、この画面を開き直してください。</string>
+    <string name="configuration_loading">カメラ設定を読み込み中…</string>
+    <string name="configuration_failed">カメラ設定を読み込めません。アプリを開き直してください。</string>
+    <string name="webview_preview_caption">ウェブページのプレビュー</string>
+    <string name="web_title">カメラ設定</string>
+    <string name="web_intro">名前とURLを編集し、「設定を保存」を押すとテレビに反映されます。URLは空欄でも構いません。</string>
+    <string name="web_name">名前</string>
+    <string name="web_url">URL</string>
+    <string name="web_url_placeholder">http:// または https://</string>
+    <string name="web_save">設定を保存</string>
+    <string name="web_session_hint">設定が完了したら、テレビの設定画面を閉じてください。このリンクは設定画面が開いている間のみ有効です。</string>
+    <string name="web_saved">保存しました。テレビの設定が更新されました。</string>
+    <string name="web_invalid_link">このリンクは無効です。テレビのQRコードをもう一度読み取ってください。</string>
+    <string name="web_method_not_allowed">この操作には対応していません。</string>
+    <string name="web_invalid_config">設定内容が無効です。</string>
+    <string name="web_storage_failed">設定を保存または読み込みできません。しばらくしてから再試行してください。</string>
+    <string name="web_wrong_origin">テレビに表示されている設定リンクを使用してください。</string>
+    <string name="web_unsupported_format">この設定形式には対応していません。</string>
+    <string name="web_body_invalid">設定のサイズが大きすぎるか、形式が正しくありません。</string>
+    <string name="web_duplicate_field">設定に重複した項目があります。</string>
+    <string name="web_missing_name">カメラ名の項目がありません。</string>
+    <string name="web_missing_url">カメラURLの項目がありません。</string>
+    <string name="validation_count">8台すべてのカメラ設定を入力してください。</string>
+    <string name="validation_name">カメラ %1$d の名前が長すぎるか、無効な文字が含まれています。</string>
+    <string name="validation_url_length">カメラ %1$d のURLが長すぎます。</string>
+    <string name="validation_url">カメラ %1$d には有効なHTTPまたはHTTPSのURLが必要です。</string>
+</resources>

@@ -39,7 +39,7 @@ fun javaStringLiteral(value: String): String = buildString {
 
 val cameraNames = (1..8).map { index ->
     cameraProperties.getProperty("camera.$index.name")?.takeIf { it.isNotBlank() }
-        ?: "攝影機 $index"
+        ?: ""
 }
 val cameraUrls = (1..8).map { index -> cameraProperties.getProperty("camera.$index.url", "") }
 
@@ -82,6 +82,20 @@ android {
     buildFeatures {
         compose = true
         buildConfig = true
+    }
+    // 手機網頁可選擇與電視不同的語言，因此安裝包必須保留所有翻譯。
+    bundle {
+        language {
+            enableSplit = false
+        }
+    }
+    testOptions {
+        unitTests.all {
+            // 翻譯測試直接讀取 XML，文字變更也必須重新執行測試。
+            it.inputs.files(fileTree("src/main/res") {
+                include("values*/strings.xml", "xml/locales_config.xml")
+            }).withPropertyName("translationResources")
+        }
     }
 }
 

@@ -1,3 +1,4 @@
+<?xml version="1.0" encoding="utf-8"?>
 <resources xmlns:tools="http://schemas.android.com/tools" tools:locale="zh-TW">
     <string name="app_name">監視器</string>
     <string name="camera_number">攝影機 %1$d</string>
@@ -14,4 +15,27 @@
     <string name="settings_server_failed">無法啟動設定服務。請確認電視已連上 Wi-Fi 或有線區域網路，再重新開啟此視窗。</string>
     <string name="configuration_loading">正在讀取攝影機設定…</string>
     <string name="configuration_failed">無法讀取攝影機設定，請重新開啟應用程式。</string>
+    <string name="webview_preview_caption">網頁畫面預覽</string>
+    <string name="web_title">監視器設定</string>
+    <string name="web_intro">修改名稱與網址後按「儲存設定」，電視會直接更新。網址可留空。</string>
+    <string name="web_name">名稱</string>
+    <string name="web_url">網址</string>
+    <string name="web_url_placeholder">http:// 或 https://</string>
+    <string name="web_save">儲存設定</string>
+    <string name="web_session_hint">完成後可關閉電視上的設定視窗。此連結僅在該視窗開啟期間有效。</string>
+    <string name="web_saved">已儲存，電視設定已更新。</string>
+    <string name="web_invalid_link">連結無效，請重新掃描電視上的 QR Code。</string>
+    <string name="web_method_not_allowed">不支援此操作。</string>
+    <string name="web_invalid_config">設定內容無效。</string>
+    <string name="web_storage_failed">無法儲存或讀取設定，請稍後重試。</string>
+    <string name="web_wrong_origin">請使用電視顯示的設定連結。</string>
+    <string name="web_unsupported_format">不支援的設定格式。</string>
+    <string name="web_body_invalid">設定內容過大或格式無效。</string>
+    <string name="web_duplicate_field">設定包含重複欄位。</string>
+    <string name="web_missing_name">缺少攝影機名稱欄位。</string>
+    <string name="web_missing_url">缺少攝影機網址欄位。</string>
+    <string name="validation_count">請提供完整的八組攝影機設定。</string>
+    <string name="validation_name">第 %1$d 支攝影機的名稱過長或包含無效字元。</string>
+    <string name="validation_url_length">第 %1$d 支攝影機的網址過長。</string>
+    <string name="validation_url">第 %1$d 支攝影機需要有效的 HTTP 或 HTTPS 網址。</string>
 </resources>

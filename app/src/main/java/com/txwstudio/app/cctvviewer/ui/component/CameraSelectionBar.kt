@@ -19,6 +19,7 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.layout.widthIn
 import androidx.compose.foundation.relocation.BringIntoViewRequester
 import androidx.compose.foundation.relocation.bringIntoViewRequester
 import androidx.compose.foundation.rememberScrollState
@@ -97,7 +98,7 @@ fun CameraSelectionBar(
                                 style = MaterialTheme.typography.labelSmall,
                             )
                             Text(
-                                text = camera.name,
+                                text = camera.name.ifBlank { stringResource(R.string.camera_number, index + 1) },
                                 style = MaterialTheme.typography.titleMedium,
                                 maxLines = 1,
                                 overflow = TextOverflow.Ellipsis,
@@ -107,7 +108,7 @@ fun CameraSelectionBar(
                 }
                 CameraButton(
                     onClick = { if (ready) onOpenSettings() },
-                    modifier = Modifier.width(128.dp).height(64.dp)
+                    modifier = Modifier.widthIn(min = 128.dp).height(64.dp)
                         .bringIntoViewRequester(scrollRequesters[cameras.size])
                         .focusRequester(focusRequesters[cameras.size])
                         .focusProperties { canFocus = ready }
@@ -135,7 +136,7 @@ private fun CameraSelectionBarPreview() {
     CCTVViewerTheme {
         Column(Modifier.background(MaterialTheme.colorScheme.background)) {
             CameraSelectionBar(
-                cameras = CameraPreviewData.cameras,
+                cameras = CameraPreviewData.cameras(),
                 activeIndex = 0,
                 focusedIndex = 1,
                 transition = remember { MutableTransitionState(true) },

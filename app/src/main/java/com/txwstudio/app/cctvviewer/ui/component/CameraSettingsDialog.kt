@@ -27,7 +27,6 @@ import androidx.compose.ui.focus.focusRequester
 import androidx.compose.ui.graphics.asImageBitmap
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
-import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.window.Dialog
 import androidx.compose.ui.window.DialogProperties
@@ -41,6 +40,8 @@ import com.google.zxing.EncodeHintType
 import com.google.zxing.qrcode.QRCodeWriter
 import com.txwstudio.app.cctvviewer.R
 import com.txwstudio.app.cctvviewer.data.Camera
+import com.txwstudio.app.cctvviewer.i18n.AndroidWebStrings
+import com.txwstudio.app.cctvviewer.ui.preview.CameraLocalesPreview
 import com.txwstudio.app.cctvviewer.network.CameraConfigServer
 import com.txwstudio.app.cctvviewer.network.LocalNetworkAddress
 import com.txwstudio.app.cctvviewer.ui.theme.CCTVViewerTheme
@@ -72,7 +73,8 @@ fun CameraSettingsDialog(
                 withContext(Dispatchers.IO) {
                     val address = LocalNetworkAddress.find(context)
                         ?: throw IllegalStateException("No local network")
-                    CameraConfigServer(address, { currentRead() }, { currentSave(it) }).also {
+                    CameraConfigServer(address, { currentRead() }, { currentSave(it) },
+                        { language -> AndroidWebStrings.create(context, language) }).also {
                         server = it
                         it.start(NanoHTTPD.SOCKET_READ_TIMEOUT, true)
                     }
@@ -139,7 +141,7 @@ private fun CameraSettingsContent(url: String?, failed: Boolean, onDismiss: () -
     LaunchedEffect(Unit) { closeFocus.requestFocus() }
 }
 
-@Preview(name = "電視・手機設定", widthDp = 960, heightDp = 540, locale = "zh-rTW")
+@CameraLocalesPreview
 @Composable
 private fun CameraSettingsPreview() {
     CCTVViewerTheme {

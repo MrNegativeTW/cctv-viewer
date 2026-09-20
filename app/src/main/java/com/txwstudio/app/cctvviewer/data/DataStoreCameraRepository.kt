@@ -23,7 +23,7 @@ class DataStoreCameraRepository(
         if (preferences[CONFIGURED] != true) initialCameras
         else List(CameraSettings.COUNT) { index ->
             Camera(
-                preferences[nameKey(index)] ?: "攝影機 ${index + 1}",
+                preferences[nameKey(index)] ?: "",
                 preferences[urlKey(index)] ?: "",
             )
         }
