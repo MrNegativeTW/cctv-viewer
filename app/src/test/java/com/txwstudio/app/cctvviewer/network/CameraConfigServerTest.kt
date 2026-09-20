@@ -30,7 +30,7 @@ class CameraConfigServerTest {
     @After
     fun stop() { server.stop() }
 
-    private data class Result(val status: Int, val body: String, val location: String?, val cache: String?, val language: String?, val vary: String?)
+    private data class Result(val status: Int, val body: String, val location: String?, val cache: String?, val language: String?, val vary: String?, val referrerPolicy: String?)
 
     private fun request(url: String = server.url, body: String? = null, origin: String? = null, acceptLanguage: String? = null): Result {
         val uri = URI(url)
@@ -63,7 +63,7 @@ class CameraConfigServerTest {
                 val pair = it.split(':', limit = 2)
                 pair[0].lowercase() to pair[1].trim()
             }
-            Result(lines[0].split(' ')[1].toInt(), sections.getOrElse(1) { "" }, fields["location"], fields["cache-control"], fields["content-language"], fields["vary"])
+            Result(lines[0].split(' ')[1].toInt(), sections.getOrElse(1) { "" }, fields["location"], fields["cache-control"], fields["content-language"], fields["vary"], fields["referrer-policy"])
         }
     }
 
@@ -99,6 +99,10 @@ class CameraConfigServerTest {
 
     @Test
     fun savesUtf8AndQueryParametersAndRedirectsToConfirmation() {
+        val page = request()
+        // Both policies must preserve the browser's Origin on a same-origin form POST.
+        assertEquals("same-origin", page.referrerPolicy)
+        assertTrue(page.body.contains("<meta name=\"referrer\" content=\"same-origin\">"))
         val edited = cameras.mapIndexed { index, camera ->
             if (index == 0) Camera("新名稱 & \"測試\"", "http://192.0.2.1/view?x=a+b&token=abc%2Fdef") else camera
         }
@@ -123,6 +127,7 @@ class CameraConfigServerTest {
     @Test
     fun rejectsCrossOriginAndOversizedRequests() {
         assertEquals(403, request(body = form(), origin = "https://example.invalid").status)
+        assertEquals(403, request(body = form(), origin = "null").status)
         assertEquals(400, request(body = "x=" + "a".repeat(300_000)).status)
         assertEquals(0, saves)
     }

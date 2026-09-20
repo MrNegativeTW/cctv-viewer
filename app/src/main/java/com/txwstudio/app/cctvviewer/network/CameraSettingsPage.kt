@@ -26,7 +26,7 @@ internal object CameraSettingsPage {
             <head>
               <meta charset="utf-8">
               <meta name="viewport" content="width=device-width, initial-scale=1">
-              <meta name="referrer" content="no-referrer">
+              <meta name="referrer" content="same-origin">
               <title>${text(WebMessage.WEB_TITLE)}</title>
               <style>
                 * { box-sizing: border-box; }

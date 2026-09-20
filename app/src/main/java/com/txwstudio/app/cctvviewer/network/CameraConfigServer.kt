@@ -98,7 +98,8 @@ class CameraConfigServer(
             addHeader("Content-Language", strings.language.tag)
             addHeader("Vary", "Accept-Language")
             addHeader("Cache-Control", "no-store")
-            addHeader("Referrer-Policy", "no-referrer")
+            // no-referrer makes browser form POSTs send Origin: null and fail origin validation.
+            addHeader("Referrer-Policy", "same-origin")
             addHeader("X-Content-Type-Options", "nosniff")
             addHeader("Content-Security-Policy", "default-src 'none'; style-src 'unsafe-inline'; form-action 'self'; frame-ancestors 'none'; base-uri 'none'")
             closeConnection(true)

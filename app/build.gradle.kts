@@ -1,3 +1,6 @@
+import java.time.LocalDate
+import java.time.ZoneOffset
+import java.time.format.DateTimeFormatter
 import java.util.Properties
 
 plugins {
@@ -95,6 +98,18 @@ android {
             it.inputs.files(fileTree("src/main/res") {
                 include("values*/strings.xml", "xml/locales_config.xml")
             }).withPropertyName("translationResources")
+        }
+    }
+}
+
+androidComponents {
+    onVariants(selector().withBuildType("release")) { variant ->
+        val releaseDate = LocalDate.now(ZoneOffset.UTC)
+            .format(DateTimeFormatter.ofPattern("yyyyMMdd"))
+        variant.outputs.forEach { output ->
+            output.outputFileName.set(output.versionName.map { versionName ->
+                "cctv-viewer_v${versionName}_${releaseDate}.apk"
+            })
         }
     }
 }
