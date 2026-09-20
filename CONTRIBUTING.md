@@ -26,6 +26,22 @@ Camera settings are optional for building and running unit tests. For manual tes
 
 Local camera settings are embedded in the APK by default. Use `-PincludeLocalCameras=false` for any build you intend to share. Do not commit camera credentials, private URLs, signing keys, or local configuration files. Remove private information from logs, screenshots, and recordings, including setup QR codes.
 
+### Release Signing
+
+1. Copy [keystore.example.properties](keystore.example.properties) to `keystore.properties` in the project root.
+2. Enter the keystore path, key alias, keystore password, and key password in that local file.
+3. Build the signed release APK:
+
+   ```sh
+   ./gradlew :app:assembleRelease -PincludeLocalCameras=false
+   ```
+
+Gradle reads `keystore.properties` as UTF-8. Relative keystore paths start from the project root. Double backslashes in property values. Git ignores `keystore.properties` and keystore files. Keep passwords out of shared run configurations.
+
+Release builds require all four signing properties. Missing or blank properties cause release signing to fail. Debug builds do not require release signing credentials.
+
+The shared **Build public release APK** configuration runs this command in Android Studio. Find it under **Run Configurations** in the Gradle tool window. It builds and signs the APK in one run. The output is in `app/build/outputs/apk/release/`.
+
 ## Making Changes
 
 Follow the existing Kotlin, Compose, and dependency patterns. Read the [software architecture](docs/software-architecture.md) before changing startup, camera viewing, scheduling, or component responsibilities; this document is currently in Traditional Chinese.

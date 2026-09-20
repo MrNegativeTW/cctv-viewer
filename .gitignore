@@ -9,6 +9,7 @@ build/
 # Local configuration file (sdk path, etc)
 local.properties
 /cameras.local.properties
+/keystore.properties
 /.git2/
 
 # Log/OS Files

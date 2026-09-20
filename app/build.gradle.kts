@@ -21,6 +21,13 @@ val cameraProperties = Properties().apply {
     }
 }
 
+val keystoreProperties = Properties().apply {
+    val contents = providers.fileContents(
+        rootProject.layout.projectDirectory.file("keystore.properties")
+    ).asText.orElse("").get()
+    contents.reader().use { load(it) }
+}
+
 fun javaStringLiteral(value: String): String = buildString {
     append('"')
     value.forEach { character ->
@@ -69,8 +76,20 @@ android {
         )
     }
 
+    signingConfigs {
+        create("release") {
+            storeFile = keystoreProperties.getProperty("storeFile")
+                ?.takeIf { it.isNotBlank() }
+                ?.let { rootProject.file(it) }
+            storePassword = keystoreProperties.getProperty("storePassword")?.takeIf { it.isNotBlank() }
+            keyAlias = keystoreProperties.getProperty("keyAlias")?.takeIf { it.isNotBlank() }
+            keyPassword = keystoreProperties.getProperty("keyPassword")?.takeIf { it.isNotBlank() }
+        }
+    }
+
     buildTypes {
         release {
+            signingConfig = signingConfigs.getByName("release")
             isMinifyEnabled = false
             proguardFiles(
                 getDefaultProguardFile("proguard-android-optimize.txt"),
