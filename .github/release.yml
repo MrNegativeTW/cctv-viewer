@@ -1,0 +1,24 @@
+# .github/release.yml
+
+changelog:
+  exclude:
+    labels:
+      - ignore-for-release
+    authors:
+      - octocat
+  categories:
+    - title: Breaking Changes
+      labels:
+        - t-Breaking
+    - title: Added
+      labels:
+        - t-New-Feature
+    - title: Changed
+      labels:
+        - t-Enhancement
+    - title: Fixed
+      labels:
+        - t-Defect
+    - title: Other Changes
+      labels:
+        - t-Chore
