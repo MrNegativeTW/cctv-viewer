@@ -10,6 +10,7 @@ import androidx.lifecycle.viewmodel.viewModelFactory
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.test.StandardTestDispatcher
+import kotlinx.coroutines.test.TestScope
 import kotlinx.coroutines.test.advanceTimeBy
 import kotlinx.coroutines.test.resetMain
 import kotlinx.coroutines.test.runCurrent
@@ -45,6 +46,15 @@ class CameraViewModelTest {
         val factory = viewModelFactory { initializer { CameraViewModel(repository, handle) } }
         return ViewModelProvider(store, factory)[CameraViewModel::class.java].also {
             dispatcher.scheduler.runCurrent()
+        }
+    }
+
+    private fun runViewModelTest(block: suspend TestScope.() -> Unit) = runTest {
+        try {
+            block()
+        } finally {
+            // Cancel repeating timers before runTest drains the virtual-time scheduler.
+            stores.forEach { it.clear() }
         }
     }
 
@@ -145,7 +155,7 @@ class CameraViewModelTest {
     }
 
     @Test
-    fun menuHidesAtTenSecondsAndDoesNotReloadCamera() = runTest {
+    fun menuHidesAtTenSecondsAndDoesNotReloadCamera() = runViewModelTest {
         val vm = model()
         vm.onForegroundChanged(true)
         runCurrent()
@@ -160,7 +170,7 @@ class CameraViewModelTest {
     }
 
     @Test
-    fun interactionCancelsOldDeadlineAndStartsFullTimeout() = runTest {
+    fun interactionCancelsOldDeadlineAndStartsFullTimeout() = runViewModelTest {
         val vm = model()
         vm.onForegroundChanged(true)
         runCurrent()
@@ -176,7 +186,7 @@ class CameraViewModelTest {
     }
 
     @Test
-    fun confirmationRestartsTimerEvenWhenCameraIsUnchanged() = runTest {
+    fun confirmationRestartsTimerEvenWhenCameraIsUnchanged() = runViewModelTest {
         val vm = model()
         vm.onForegroundChanged(true)
         runCurrent()
@@ -192,7 +202,7 @@ class CameraViewModelTest {
     }
 
     @Test
-    fun backgroundCancelsTimerAndResumeStartsFreshTimeout() = runTest {
+    fun backgroundCancelsTimerAndResumeStartsFreshTimeout() = runViewModelTest {
         val vm = model()
         vm.onForegroundChanged(true)
         runCurrent()
@@ -212,7 +222,7 @@ class CameraViewModelTest {
     }
 
     @Test
-    fun automaticFocusRestorationDoesNotExtendTimeout() = runTest {
+    fun automaticFocusRestorationDoesNotExtendTimeout() = runViewModelTest {
         val vm = model()
         vm.onForegroundChanged(true)
         runCurrent()
@@ -224,7 +234,7 @@ class CameraViewModelTest {
     }
 
     @Test
-    fun showingMenuAfterAutoHideStartsAnotherTimeout() = runTest {
+    fun showingMenuAfterAutoHideStartsAnotherTimeout() = runViewModelTest {
         val vm = model()
         vm.onForegroundChanged(true)
         runCurrent()
@@ -241,7 +251,7 @@ class CameraViewModelTest {
     }
 
     @Test
-    fun manualHideCancelsOldTimerBeforeMenuIsShownAgain() = runTest {
+    fun manualHideCancelsOldTimerBeforeMenuIsShownAgain() = runViewModelTest {
         val vm = model()
         vm.onForegroundChanged(true)
         runCurrent()
@@ -254,7 +264,7 @@ class CameraViewModelTest {
         assertTrue(vm.uiState.value.cameraBarVisible)
     }
     @Test
-    fun remoteNameChangeUpdatesWithoutReload() = runTest {
+    fun remoteNameChangeUpdatesWithoutReload() = runViewModelTest {
         val vm = model()
         repository.saveCameras(cameras.mapIndexed { index, camera ->
             if (index == 0) camera.copy(name = "新名稱") else camera
@@ -265,7 +275,7 @@ class CameraViewModelTest {
     }
 
     @Test
-    fun remoteActiveUrlChangeReloadsOnlyCurrentCamera() = runTest {
+    fun remoteActiveUrlChangeReloadsOnlyCurrentCamera() = runViewModelTest {
         val vm = model()
         repository.saveCameras(cameras.mapIndexed { index, camera ->
             if (index == 1) camera.copy(url = "https://example.invalid/other") else camera
@@ -281,7 +291,7 @@ class CameraViewModelTest {
     }
 
     @Test
-    fun settingsPauseAutoHideAndClosingRestartsTimer() = runTest {
+    fun settingsPauseAutoHideAndClosingRestartsTimer() = runViewModelTest {
         val vm = model()
         vm.onForegroundChanged(true)
         vm.onAction(CameraAction.OpenSettings)
@@ -298,6 +308,176 @@ class CameraViewModelTest {
         advanceTimeBy(1)
         runCurrent()
         assertFalse(vm.uiState.value.cameraBarVisible)
+    }
+
+    @Test
+    fun automaticReloadRepeatsEveryThirtySecondsWithoutChangingSelectionOrMenu() = runViewModelTest {
+        val vm = model()
+        vm.onAction(CameraAction.ConfirmCamera(3))
+        vm.onAction(CameraAction.CameraFocused(5))
+        vm.onForegroundChanged(true)
+        runCurrent()
+        advanceTimeBy(29_999)
+        runCurrent()
+        assertEquals(0, vm.uiState.value.reloadVersion)
+        val beforeReload = vm.uiState.value
+        advanceTimeBy(1)
+        runCurrent()
+        assertEquals(beforeReload.copy(reloadVersion = 1), vm.uiState.value)
+        advanceTimeBy(30_000)
+        runCurrent()
+        assertEquals(beforeReload.copy(reloadVersion = 2), vm.uiState.value)
+    }
+
+    @Test
+    fun menuInteractionAndConfirmingCurrentCameraDoNotPostponeReload() = runViewModelTest {
+        val vm = model()
+        vm.onForegroundChanged(true)
+        runCurrent()
+        advanceTimeBy(25_000)
+        vm.onAction(CameraAction.ShowCameraBar)
+        vm.onAction(CameraAction.UserInteraction)
+        vm.onAction(CameraAction.ConfirmCamera(0))
+        runCurrent()
+        advanceTimeBy(5_000)
+        runCurrent()
+        assertEquals(1, vm.uiState.value.reloadVersion)
+        assertTrue(vm.uiState.value.cameraBarVisible)
+    }
+
+    @Test
+    fun switchingCameraAndManualRetryStartFreshReloadIntervals() = runViewModelTest {
+        val vm = model()
+        vm.onForegroundChanged(true)
+        runCurrent()
+        advanceTimeBy(25_000)
+        vm.onAction(CameraAction.ShowCameraBar)
+        vm.onAction(CameraAction.ConfirmCamera(2))
+        runCurrent()
+        advanceTimeBy(29_999)
+        runCurrent()
+        assertEquals(2, vm.uiState.value.activeIndex)
+        assertEquals(0, vm.uiState.value.reloadVersion)
+        advanceTimeBy(1)
+        runCurrent()
+        assertEquals(1, vm.uiState.value.reloadVersion)
+
+        advanceTimeBy(25_000)
+        vm.onAction(CameraAction.ReloadCamera)
+        runCurrent()
+        assertEquals(2, vm.uiState.value.reloadVersion)
+        advanceTimeBy(29_999)
+        runCurrent()
+        assertEquals(2, vm.uiState.value.reloadVersion)
+        advanceTimeBy(1)
+        runCurrent()
+        assertEquals(3, vm.uiState.value.reloadVersion)
+    }
+
+    @Test
+    fun onlyActiveUrlChangesRestartTheReloadInterval() = runViewModelTest {
+        val vm = model()
+        vm.onForegroundChanged(true)
+        runCurrent()
+        advanceTimeBy(25_000)
+        repository.saveCameras(cameras.mapIndexed { index, camera ->
+            when (index) {
+                0 -> camera.copy(name = "Updated name")
+                1 -> camera.copy(url = "https://example.invalid/other")
+                else -> camera
+            }
+        })
+        runCurrent()
+        advanceTimeBy(5_000)
+        runCurrent()
+        assertEquals(1, vm.uiState.value.reloadVersion)
+
+        advanceTimeBy(25_000)
+        repository.saveCameras(repository.cameras.value.mapIndexed { index, camera ->
+            if (index == 0) camera.copy(url = "https://example.invalid/current") else camera
+        })
+        runCurrent()
+        assertEquals(2, vm.uiState.value.reloadVersion)
+        advanceTimeBy(29_999)
+        runCurrent()
+        assertEquals(2, vm.uiState.value.reloadVersion)
+        advanceTimeBy(1)
+        runCurrent()
+        assertEquals(3, vm.uiState.value.reloadVersion)
+    }
+
+    @Test
+    fun backgroundAndSettingsPauseReloadAndResumeWithFullIntervals() = runViewModelTest {
+        val vm = model()
+        advanceTimeBy(60_000)
+        runCurrent()
+        assertEquals(0, vm.uiState.value.reloadVersion)
+        vm.onForegroundChanged(true)
+        runCurrent()
+        advanceTimeBy(25_000)
+        vm.onForegroundChanged(false)
+        advanceTimeBy(60_000)
+        runCurrent()
+        assertEquals(0, vm.uiState.value.reloadVersion)
+
+        vm.onForegroundChanged(true)
+        runCurrent()
+        advanceTimeBy(29_999)
+        runCurrent()
+        assertEquals(0, vm.uiState.value.reloadVersion)
+        advanceTimeBy(1)
+        runCurrent()
+        assertEquals(1, vm.uiState.value.reloadVersion)
+
+        advanceTimeBy(25_000)
+        vm.onAction(CameraAction.OpenSettings)
+        runCurrent()
+        advanceTimeBy(60_000)
+        runCurrent()
+        assertEquals(1, vm.uiState.value.reloadVersion)
+        vm.onAction(CameraAction.CloseSettings)
+        runCurrent()
+        advanceTimeBy(29_999)
+        runCurrent()
+        assertEquals(1, vm.uiState.value.reloadVersion)
+        advanceTimeBy(1)
+        runCurrent()
+        assertEquals(2, vm.uiState.value.reloadVersion)
+    }
+
+    @Test
+    fun reloadWaitsForCameraDataAndSkipsBlankUrls() = runViewModelTest {
+        repository.cameras.value = emptyList()
+        val vm = model()
+        vm.onForegroundChanged(true)
+        runCurrent()
+        advanceTimeBy(60_000)
+        runCurrent()
+        assertEquals(0, vm.uiState.value.reloadVersion)
+        repository.saveCameras(cameras)
+        runCurrent()
+        advanceTimeBy(30_000)
+        runCurrent()
+        assertEquals(1, vm.uiState.value.reloadVersion)
+
+        repository.saveCameras(cameras.map { it.copy(url = "") })
+        runCurrent()
+        assertEquals(2, vm.uiState.value.reloadVersion)
+        advanceTimeBy(60_000)
+        runCurrent()
+        assertEquals(2, vm.uiState.value.reloadVersion)
+    }
+
+    @Test
+    fun clearingViewModelCancelsAutomaticReload() = runViewModelTest {
+        val vm = model()
+        vm.onForegroundChanged(true)
+        runCurrent()
+        advanceTimeBy(25_000)
+        stores.forEach { it.clear() }
+        advanceTimeBy(60_000)
+        runCurrent()
+        assertEquals(0, vm.uiState.value.reloadVersion)
     }
 
 }

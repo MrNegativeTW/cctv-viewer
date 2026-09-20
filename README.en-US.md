@@ -31,6 +31,7 @@
 
 - Supports eight camera feeds.
 - Configure camera URLs from your phone.
+- Automatically refresh the page every 30 seconds.
 
 <a id="configuration"></a>
 

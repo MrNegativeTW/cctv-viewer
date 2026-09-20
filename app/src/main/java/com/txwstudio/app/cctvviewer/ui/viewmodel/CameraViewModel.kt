@@ -30,6 +30,7 @@ class CameraViewModel(
     val uiState = mutableUiState.asStateFlow()
     private var isForeground = false
     private var idleJob: Job? = null
+    private var reloadJob: Job? = null
 
     init {
         viewModelScope.launch {
@@ -55,6 +56,9 @@ class CameraViewModel(
                     )
                 }
                 if (previous.cameras.isEmpty()) restartIdleTimer()
+                if (previous.cameras.isEmpty() || changedUrl || active != previous.activeIndex) {
+                    restartReloadTimer()
+                }
             }
         }
     }
@@ -82,21 +86,26 @@ class CameraViewModel(
             }
             is CameraAction.ConfirmCamera -> {
                 if (action.index in uiState.value.cameras.indices && uiState.value.cameraBarVisible) {
+                    val changedCamera = action.index != uiState.value.activeIndex
                     updateState { it.copy(activeIndex = action.index, focusedIndex = action.index) }
                     restartIdleTimer()
+                    if (changedCamera) restartReloadTimer()
                 }
             }
             CameraAction.ReloadCamera -> {
                 updateState { it.copy(reloadVersion = it.reloadVersion + 1) }
                 restartIdleTimer()
+                restartReloadTimer()
             }
             CameraAction.OpenSettings -> {
                 updateState { it.copy(settingsVisible = true) }
                 restartIdleTimer()
+                restartReloadTimer()
             }
             CameraAction.CloseSettings -> {
                 updateState { it.copy(settingsVisible = false) }
                 restartIdleTimer()
+                restartReloadTimer()
             }
         }
     }
@@ -105,6 +114,7 @@ class CameraViewModel(
         if (isForeground == foreground) return
         isForeground = foreground
         restartIdleTimer()
+        restartReloadTimer()
     }
 
     private fun moveFocus(offset: Int) {
@@ -125,6 +135,19 @@ class CameraViewModel(
         }
     }
 
+    private fun restartReloadTimer() {
+        reloadJob?.cancel()
+        reloadJob = null
+        val state = uiState.value
+        if (!isForeground || state.settingsVisible || state.activeCamera?.url.isNullOrBlank()) return
+        reloadJob = viewModelScope.launch {
+            while (true) {
+                delay(CAMERA_RELOAD_INTERVAL_MS)
+                updateState { it.copy(reloadVersion = it.reloadVersion + 1) }
+            }
+        }
+    }
+
     private fun updateState(transform: (CameraUiState) -> CameraUiState) {
         val state = transform(mutableUiState.value)
         savedStateHandle[ACTIVE_INDEX] = state.activeIndex
@@ -138,6 +161,7 @@ class CameraViewModel(
         private const val FOCUSED_INDEX = "focused_camera_index"
         private const val BAR_VISIBLE = "camera_bar_visible"
         private const val CAMERA_BAR_IDLE_TIMEOUT_MS = 10_000L
+        private const val CAMERA_RELOAD_INTERVAL_MS = 30_000L
 
         fun factory(repository: CameraRepository) = viewModelFactory {
             initializer { CameraViewModel(repository, createSavedStateHandle()) }
