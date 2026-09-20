@@ -6,7 +6,7 @@
     <string name="camera_not_configured">尚未为此摄像头设置有效网址。</string>
     <string name="camera_load_failed">无法打开此摄像头。请确认摄像头已联网，且电视已连接到正确的网络。</string>
     <string name="camera_certificate_error">无法验证此摄像头的安全证书。</string>
-    <string name="phone_settings">手机设置</string>
+    <string name="phone_settings">设置</string>
     <string name="close_settings">关闭</string>
     <string name="settings_qr_description">扫码设置摄像头</string>
     <string name="settings_instructions">手机和电视连接到同一局域网后，扫描二维码或打开下方网址。</string>

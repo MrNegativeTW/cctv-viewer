@@ -6,7 +6,7 @@
     <string name="camera_not_configured">This camera does not have a valid URL configured yet.</string>
     <string name="camera_load_failed">Unable to open this camera. Check that it is online and your TV is connected to the correct network.</string>
     <string name="camera_certificate_error">Unable to verify this camera’s security certificate.</string>
-    <string name="phone_settings">Phone settings</string>
+    <string name="phone_settings">Configurations</string>
     <string name="close_settings">Close</string>
     <string name="settings_qr_description">Scan to configure cameras</string>
     <string name="settings_instructions">Connect your phone and TV to the same local network, then scan the QR code or open the address below.</string>

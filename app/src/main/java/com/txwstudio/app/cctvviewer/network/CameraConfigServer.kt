@@ -12,7 +12,6 @@ import java.io.IOException
 import java.net.URLDecoder
 import java.security.MessageDigest
 import java.security.SecureRandom
-import java.util.Base64
 import kotlinx.coroutines.runBlocking
 
 class CameraConfigServer(
@@ -21,8 +20,13 @@ class CameraConfigServer(
     private val saveCameras: suspend (List<Camera>) -> Unit,
     private val stringsFor: (AppLanguage) -> WebStrings,
 ) : NanoHTTPD(address, 0) {
-    private val token = ByteArray(18).also { SecureRandom().nextBytes(it) }
-        .let { Base64.getUrlEncoder().withoutPadding().encodeToString(it) }
+    private val token = SecureRandom().let { random ->
+        buildString {
+            repeat(TOKEN_LENGTH) {
+                append(TOKEN_ALPHABET[random.nextInt(TOKEN_ALPHABET.length)])
+            }
+        }
+    }
     private val path = "/$token"
     val url: String get() = "http://$address:$listeningPort$path"
 
@@ -107,6 +111,8 @@ class CameraConfigServer(
     private class WebRequestException(val messageKey: WebMessage) : IllegalArgumentException(messageKey.name)
 
     companion object {
+        private const val TOKEN_LENGTH = 6
+        private const val TOKEN_ALPHABET = "abcdefghijklmnopqrstuvwxyz"
         private const val MAX_BODY_BYTES = 256 * 1024
     }
 }

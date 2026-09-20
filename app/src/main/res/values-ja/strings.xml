@@ -6,7 +6,7 @@
     <string name="camera_not_configured">このカメラには有効なURLが設定されていません。</string>
     <string name="camera_load_failed">このカメラを開けません。カメラがオンラインで、テレビが正しいネットワークに接続されていることを確認してください。</string>
     <string name="camera_certificate_error">このカメラのセキュリティ証明書を確認できません。</string>
-    <string name="phone_settings">スマホ設定</string>
+    <string name="phone_settings">設定</string>
     <string name="close_settings">閉じる</string>
     <string name="settings_qr_description">読み取ってカメラを設定</string>
     <string name="settings_instructions">スマートフォンとテレビを同じローカルネットワークに接続し、QRコードを読み取るか、下のURLを開いてください。</string>

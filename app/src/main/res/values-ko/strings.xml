@@ -6,7 +6,7 @@
     <string name="camera_not_configured">이 카메라에 유효한 URL이 아직 설정되지 않았습니다.</string>
     <string name="camera_load_failed">카메라를 열 수 없습니다. 카메라가 온라인 상태이고 TV가 올바른 네트워크에 연결되어 있는지 확인하세요.</string>
     <string name="camera_certificate_error">이 카메라의 보안 인증서를 확인할 수 없습니다.</string>
-    <string name="phone_settings">휴대전화 설정</string>
+    <string name="phone_settings">설정</string>
     <string name="close_settings">닫기</string>
     <string name="settings_qr_description">스캔하여 카메라 설정</string>
     <string name="settings_instructions">휴대전화와 TV를 같은 로컬 네트워크에 연결한 다음 QR 코드를 스캔하거나 아래 주소를 여세요.</string>

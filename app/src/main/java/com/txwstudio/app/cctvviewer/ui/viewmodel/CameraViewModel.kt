@@ -109,7 +109,7 @@ class CameraViewModel(
 
     private fun moveFocus(offset: Int) {
         if (!uiState.value.cameraBarVisible || uiState.value.cameras.isEmpty()) return
-        // 最後一個項目為「手機設定」。
+        // 最後一個項目為「設定」。
         updateState { it.copy(focusedIndex = (it.focusedIndex + offset).coerceIn(0..it.cameras.size)) }
         restartIdleTimer()
     }

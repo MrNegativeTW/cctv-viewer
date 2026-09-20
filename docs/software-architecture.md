@@ -42,7 +42,7 @@ ViewModel 單元測試位於 `app/src/test/java/com/txwstudio/app/cctvviewer/ui/
 
 ## 手機設定
 
-`CameraSettingsDialog` 開啟時，依電視的 Wi-Fi 或乙太網路介面取得 IPv4 位址，並在該位址啟動 `CameraConfigServer`。系統配置可用的連接埠，每次產生新的隨機存取路徑；關閉視窗或生命週期進入背景時停止服務，返回前景則產生新的連結。
+`CameraSettingsDialog` 開啟時，依電視的 Wi-Fi 或乙太網路介面取得 IPv4 位址，並在該位址啟動 `CameraConfigServer`。系統配置可用的連接埠，每次以 `SecureRandom` 產生六個小寫英文字母的存取路徑，例如 `http://192.168.1.5:<port>/adbcdf`；關閉視窗或生命週期進入背景時停止服務，返回前景則重新產生連結。
 
 手機頁面使用伺服器產生的 HTML 表單，不依賴外部網站、JavaScript 或雲端服務。GET 讀取目前設定，POST 驗證完整的八組資料後，以 DataStore 交易一次儲存；成功後重新導向確認頁。伺服器限制內容大小，拒絕不同來源的表單提交，並禁止快取。HTTP 本身不提供傳輸加密。
 

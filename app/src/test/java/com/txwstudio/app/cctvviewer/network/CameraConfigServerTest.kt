@@ -8,6 +8,7 @@ import java.net.Socket
 import java.net.InetSocketAddress
 import java.net.URI
 import java.net.URLEncoder
+import java.util.Locale
 import org.junit.After
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertFalse
@@ -70,6 +71,17 @@ class CameraConfigServerTest {
         listOf("camera.${index + 1}.name" to camera.name, "camera.${index + 1}.url" to camera.url)
     }.joinToString("&") { (key, value) ->
         "${URLEncoder.encode(key, "UTF-8")}=${URLEncoder.encode(value, "UTF-8")}"
+    }
+
+    @Test
+    fun settingsPathUsesSixLowercaseLettersAndRequiresAnExactMatch() {
+        val uri = URI(server.url)
+        assertTrue(uri.path.matches(Regex("/[a-z]{6}")))
+        assertEquals(200, request().status)
+        val base = "${uri.scheme}://${uri.authority}"
+        assertEquals(404, request(base + uri.path.uppercase(Locale.ROOT)).status)
+        assertEquals(404, request(server.url.dropLast(1)).status)
+        assertEquals(404, request(server.url + "x").status)
     }
 
     @Test
