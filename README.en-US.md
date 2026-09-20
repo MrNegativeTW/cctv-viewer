@@ -94,4 +94,4 @@ Sync Gradle and select **Run 'app'**.
 
 ## License
 
-Not yet determined.
+[MIT License](LICENSE). Third-party materials retain their own licenses; see [Third-Party Notices](THIRD_PARTY_NOTICES.md).

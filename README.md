@@ -94,4 +94,4 @@ Sync Gradle and Run 'app'
 
 ## 授權
 
-尚未決定
+[MIT License](LICENSE). Third-party materials retain their own licenses; see [Third-Party Notices](THIRD_PARTY_NOTICES.md).
