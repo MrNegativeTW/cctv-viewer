@@ -14,8 +14,9 @@
 <p>
   <a href="#preview">Preview</a> •
   <a href="#features">Features</a> •
+  <a href="#installation">Installation</a> •
   <a href="#configuration">Camera Setup</a> •
-  <a href="#installation">Build and Install</a> •
+  <a href="#build-and-install">Build and Install</a> •
   <a href="#credits">Credits</a> •
   <a href="#license">License</a>
 </p>
@@ -23,32 +24,40 @@
 
 ## Preview
 
+### Screenshot
 <img src="assets/preview-20260921.png" height="256" alt="CCTV Viewer app preview">
+
+### On a Sony TV
+<img src="assets/preview-20260921~1.jpg" height="256" alt="CCTV Viewer running on a Sony TV">
 
 <a id="features"></a>
 
 ## Features
 
-- Supports eight camera feeds.
-- Configure camera URLs from your phone.
-- Automatically refresh the page every 30 seconds.
+- Supports navigation with the remote's up, down, left, and right buttons.
+- Supports up to eight camera feeds.
+- Lets you quickly configure camera URLs from your phone.
+- Automatically refreshes web pages every 30 seconds.
+
+<a id="installation"></a>
+
+## Installation
+
+1. Download the latest version from [GitHub Releases](/releases).
+2. Use [Send Files to TV](https://www.sendfilestotv.app/) to transfer the APK to your TV.
+3. Install the APK.
 
 <a id="configuration"></a>
 
 ## Camera Setup
 
-Choose either method below.
+### Method 1: Set Up with Your Phone After Installation (Recommended)
 
-### Set Up with Your Phone (Recommended)
+1. Connect your TV and phone to the same network.
+2. On your TV, scroll to the far right of the camera list and select **Settings**.
+3. Scan the QR code on your TV with your phone to configure the camera URLs.
 
-1. Connect your phone and TV to the same network.
-2. Select "Settings" at the far right of the camera list, or press the Menu button on your remote.
-3. Scan the QR code on your TV with your phone to configure camera URLs.
-4. The temporary link expires when you close the settings dialog on your TV or leave the app.
-
-The setup service uses IPv4 and HTTP. The temporary link restricts access, but data is not encrypted in transit.
-
-### Configure at Build Time
+### Method 2: Build from Source (Advanced)
 
 1. Start with the example file, [cameras.example.properties](cameras.example.properties):
 
@@ -65,19 +74,18 @@ The setup service uses IPv4 and HTTP. The temporary link restricts access, but d
 
 3. Notes:
 
-   - URLs must use `http://` or `https://`. The app does not include an RTSP player.
-   - The configuration file uses UTF-8, so you can enter Chinese characters directly. Values do not need quotation marks.
-   - Keep `&` characters in URLs as they are; do not replace them with `&amp;`. Single quotes do not need escaping. Write any backslash in a value as `\\`.
-   - JavaScript, web storage, and media autoplay are enabled. Camera web pages must display their feeds automatically.
-   - HTTP connections are allowed, but invalid HTTPS certificates are not bypassed.
+   - URLs must start with `http://` or `https://`. RTSP and RTMP are not supported.
+   - The configuration file uses UTF-8. You can enter Chinese characters directly. Values do not need quotation marks.
+   - Keep `&` characters in URLs as they are. Do not replace them with `&amp;`. Single quotes do not need escaping. Write a backslash in a value as `\\`.
+   - JavaScript, web storage, and media autoplay are enabled.
 
-<a id="installation"></a>
+<a id="build-and-install"></a>
 
 ## Build and Install
 
 ### Requirements
 
-- Android TV running Android 8.0 (API 26) or later
+- Android TV (Android 8, API 26)
 - Android SDK 37
 - JDK 21
 

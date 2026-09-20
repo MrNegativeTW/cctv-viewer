@@ -14,8 +14,9 @@
 <p>
   <a href="#preview">Preview</a> •
   <a href="#features">功能</a> •
+  <a href="#installation">如何安裝</a> •
   <a href="#configuration">攝影機設定</a> •
-  <a href="#installation">建置與安裝</a> •
+  <a href="#build-and-install">建置與安裝</a> •
   <a href="#credits">素材來源</a> •
   <a href="#license">授權</a>
 </p>
@@ -23,32 +24,40 @@
 
 ## Preview
 
+### Screenshot
 <img src="assets/preview-20260921.png" height="256" alt="監視器應用程式圖示">
+
+### On Sony TV
+<img src="assets/preview-20260921~1.jpg" height="256" alt="監視器應用程式圖示">
 
 <a id="features"></a>
 
 ## 功能
 
-- 支援 8 路影像
-- 可用手機設定攝影機網址
+- 完全支援遙控器上下左右操作
+- 最多可設定 8 路影像
+- 使用手機快速設定攝影機網址
 - 每 30 秒自動重整網頁
+
+<a id="installation"></a>
+
+## 如何安裝
+
+1. 從 [GitHub Release](/releases) 下載最新版。
+2. 使用 [Send Files to TV](https://www.sendfilestotv.app/) 將 APK 傳輸至電視。
+3. 安裝，大功告成！
 
 <a id="configuration"></a>
 
-## 攝影機設定
+## 如何設定攝影機
 
-擇一使用
+### 方法一：安裝後使用手機設定（推薦）
 
-### 使用手機設定（推薦）
+1. **電視** 與 **手機** 連線到同一個網路。
+2. 在 **電視** 上的攝影機清單滑至最右側，選擇「設定」。
+3. 掃描 **電視** 上的 QR Code 即可在手機上設定監視器網址。
 
-1. 手機與電視連線到同一個網路下。
-2. 在攝影機清單最右側選擇「設定」，或按遙控器的選單鍵。
-3. 手機掃描電視上的 QR Code 即可在手機上設定監視器網址。
-4. 關閉電視上的設定視窗或離開應用程式後，臨時連結即失效。
-
-設定服務使用 IPv4 與 HTTP；臨時連結限制存取，但不加密傳輸。
-
-### 建置時設定
+### 方法二：Build from Source（進階）
 
 1. 從範例檔開始 [cameras.example.properties](cameras.example.properties)：
 
@@ -65,19 +74,18 @@
 
 3. 注意事項
 
-   - 網址須使用 `http://` 或 `https://`。應用程式未內建 RTSP 播放器。
-   - 設定檔使用 UTF-8，可直接填入中文；值不需要加引號。
-   - 網址中的 `&` 直接保留，不要寫成 `&amp;`；單引號不需跳脫。若值包含反斜線，請寫成 `\\`。
-   - 已啟用網頁指令碼、網頁儲存空間與媒體自動播放；攝影機網頁須能自動顯示影像。
-   - 允許 HTTP 連線，但不會略過無效的 HTTPS 安全性憑證。
+   - 網址須為 `http://` 或 `https://`；不支援 RTSP/RTMP。
+   - 設定檔使用 UTF-8，可直接填入中文，值不需加引號。
+   - 網址中的 `&` 直接保留，不要寫成 `&amp;`；單引號不需跳脫；若值包含反斜線，請寫成 `\\`。
+   - 已啟用網頁指令碼、網頁儲存空間與媒體自動播放。
 
-<a id="installation"></a>
+<a id="build-and-install"></a>
 
 ## 建置與安裝
 
 ### 環境需求
 
-- Android TV (Android 8., API 26)
+- Android TV (Android 8, API 26)
 - Android SDK 37
 - JDK 21
 
